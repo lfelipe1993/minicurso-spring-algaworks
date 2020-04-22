@@ -1,23 +1,95 @@
 package br.net.digitalzone.osworks.api.controller;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.net.digitalzone.osworks.domain.model.Cliente;
+import br.net.digitalzone.osworks.domain.repository.ClienteRepository;
+import br.net.digitalzone.osworks.domain.service.CadastroClienteService;
 
 @RestController
+@RequestMapping("/clientes")
 public class ClienteController {
 	
-	@GetMapping("/clientes")
+
+	
+	@Autowired
+	private ClienteRepository clienteRepository;
+	
+	@Autowired
+	private CadastroClienteService cadastroClienteService;
+	
+	@GetMapping
 	public List<Cliente> listar() {
 		
-		Cliente cliente1 = new Cliente(1L, "Luiz Felipe Mecina Greijo", "lfelipe1993@live.com", "(18) 99818-0540");
-		Cliente cliente2 = new Cliente(2L, "Matheus Tavares", "matheus@live.com", "(18) 3341-3583");
+		return clienteRepository.findAll();
+	}
+	
+	@GetMapping("/{clienteId}")
+	public ResponseEntity<Cliente> buscar(@PathVariable Long clienteId) {
+		Optional<Cliente> cliente = clienteRepository.findById(clienteId);
 		
-		return Arrays.asList(cliente1,cliente2);
+		if(cliente.isPresent()) {
+			return ResponseEntity.ok().body(cliente.get());
+		}
+		
+		return ResponseEntity.notFound().build();
+		
+	}
+	
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public Cliente adicionar(@Valid @RequestBody Cliente cliente) {
+		return cadastroClienteService.salvar(cliente);
+	}
+	
+	@PutMapping("/{clienteId}")
+	public ResponseEntity<Cliente> atualizar(@Valid @PathVariable Long clienteId, @RequestBody Cliente cliente){
+		
+		if(!clienteRepository.existsById(clienteId)) {
+			return ResponseEntity.notFound().build();
+		}
+		
+		cliente.setId(clienteId);
+		cliente = cadastroClienteService.salvar(cliente);
+		
+		return ResponseEntity.ok(cliente);
+		
+	}
+	
+	@DeleteMapping("/{clienteId}")
+	public ResponseEntity<Void> remover(@PathVariable Long clienteId){
+		
+		if(!clienteRepository.existsById(clienteId)) {
+			return ResponseEntity.notFound().build();
+		}
+		
+		cadastroClienteService.excluir(clienteId);
+		
+		return ResponseEntity.noContent().build();
+	}
+	
+	
+	@GetMapping("/clientes/q")
+	public List<Cliente> listarPorNome(@RequestParam(value = "name") String nome) {
+		
+		return clienteRepository.findByNomeContaining(nome);
 	}
 
 }
