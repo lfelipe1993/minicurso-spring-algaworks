@@ -1,6 +1,6 @@
 package br.net.digitalzone.osworks.api.exceptionhandler;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import br.net.digitalzone.osworks.exception.EntidadeNaoEncontradaException;
 import br.net.digitalzone.osworks.exception.NegocioException;
 
 @ControllerAdvice
@@ -25,13 +26,26 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	@Autowired
 	private MessageSource MessageSource;
 	
+	
+	
+	@ExceptionHandler(EntidadeNaoEncontradaException.class)
+	public ResponseEntity<Object> handleEntidadeNaoEncontradaException(NegocioException ex, WebRequest request) {
+		var status = HttpStatus.NOT_FOUND;
+		Problema problema = new Problema();
+		problema.setStatus(status.value());
+		problema.setTitulo(ex.getMessage());
+		problema.setDatahora(OffsetDateTime.now());
+		
+		return handleExceptionInternal(ex, problema, new HttpHeaders(), status, request);
+	}
+	
 	@ExceptionHandler(NegocioException.class)
 	public ResponseEntity<Object> handleNegocio(NegocioException ex, WebRequest request) {
 		var status = HttpStatus.BAD_REQUEST;
 		Problema problema = new Problema();
 		problema.setStatus(status.value());
 		problema.setTitulo(ex.getMessage());
-		problema.setDatahora(LocalDateTime.now());
+		problema.setDatahora(OffsetDateTime.now());
 		
 		return handleExceptionInternal(ex, problema, new HttpHeaders(), status, request);
 	}
@@ -53,7 +67,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		Problema problema = new Problema();
 		problema.setStatus(status.value());
 		problema.setTitulo("Um ou mais campos estão invalidos. Faça o preenchimento correto e tente novamente.");
-		problema.setDatahora(LocalDateTime.now());
+		problema.setDatahora(OffsetDateTime.now());
 		problema.setCampos(campos);
 		
 		

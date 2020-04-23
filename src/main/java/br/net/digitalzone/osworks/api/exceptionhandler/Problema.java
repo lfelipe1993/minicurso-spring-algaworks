@@ -1,7 +1,7 @@
 package br.net.digitalzone.osworks.api.exceptionhandler;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -13,7 +13,7 @@ public class Problema implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private Integer status;
-	private LocalDateTime datahora;
+	private OffsetDateTime datahora;
 	private String titulo;
 	private List<Campo> campos;
 
@@ -55,11 +55,11 @@ public class Problema implements Serializable {
 		this.status = status;
 	}
 
-	public LocalDateTime getDatahora() {
+	public OffsetDateTime getDatahora() {
 		return datahora;
 	}
 
-	public void setDatahora(LocalDateTime datahora) {
+	public void setDatahora(OffsetDateTime datahora) {
 		this.datahora = datahora;
 	}
 
